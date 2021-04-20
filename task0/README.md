@@ -1,5 +1,4 @@
 
-
 # Task0: Build C++ Program with CMake
 
 **Deadline: Apr.22th(Thu) at15:00pm**
@@ -10,10 +9,10 @@
 
 ![preview](task0_preview.png)
 
-Follow the instruction below to build the attached C++ code. This code will display an OpenGL window showing a triangle.  Take a screenshot of the window (it should look like the image above) and paste it below.  By putting the imae under the directory `pba-<username>/task0` and edit this markdown document. 
+Follow the instruction below to build the attached C++ code. This code will display an OpenGL window showing a triangle.  Take a screenshot of the window (it should look like the image above) and paste it below,  by putting the image under the directory `pba-makokaz/task0` and editing this markdown document. 
 
 === (paste the screenshot image here`![](image file name)` ) === 
-
+![answer](task0_answer.png)
 
 
 ----
@@ -25,7 +24,7 @@ Follow the instruction below to build the attached C++ code. This code will disp
 
 ### Set Up Programming Environment 
 
-You need to have **git**, **cmake**, and **C++ compiler** in your computer to complete this assignement. Read the following document to install these. 
+You need to have **git**, **cmake**, and **C++ compiler** in your computer to complete this assignment. Read the following document to install these. 
 
 [How to Set Up C++ Programming Environment](../doc/setup_env.md)
 
@@ -42,14 +41,14 @@ $ git clone https://github.com/PBA-2021S/pba-<username>.git
 Go to the top of the local repository
 
 ```bash
-$ cd pba-<username>     # go to the local repository
+$ cd pba-makokaz     # go to the local repository
 ```
 
 
 
 ### Update Local Repository
 
-Please updat the local repository on your computer
+Please update the local repository on your computer
 
 ```bash
 $ git checkout main   # set main branch as the current branch
@@ -61,7 +60,7 @@ $ git reset --hard origin/main  # reset the local main branch same as remote rep
 
 ### Set Up GLFW Library
 
-`GLFW` library is necessary to compile the code. Read the following document to set up the library under `pba-<username>/3rd_party/`
+`GLFW` library is necessary to compile the code. Read the following document to set up the library under `pba-makokaz/3rd_party/`
 
 [How to Set Up GLFW Library](../doc/setup_glfw.md)
 
@@ -69,7 +68,7 @@ $ git reset --hard origin/main  # reset the local main branch same as remote rep
 
 ### Creating a Branch
 
-To do this assignement, you need to be in the branch `task0`.  You can always check your the current branch by
+To do this assignment, you need to be in the branch `task0`.  You can always check your the current branch by
 
 ```bash
 $ git branch -a   # list all branches, showing the current branch 
@@ -95,7 +94,7 @@ $ cd build
 $ cmake .. 
 $ cmake --build .
 ```
-Update this markdown document by editing `pba-<username>/task0/README.md` .Please learn the syntax of the markdown document by yourself.
+Update this markdown document by editing `pba-makokaz/task0/README.md` .Please learn the syntax of the markdown document by yourself.
 
 
 
@@ -104,7 +103,7 @@ Update this markdown document by editing `pba-<username>/task0/README.md` .Pleas
 Finally, you submit the document by pushing to the `task0` branch of the remote repository. 
 
 ```bash
-cd pba-<username>    # go to the top of the repository
+cd pba-makokaz    # go to the top of the repository
 git status  # check the changes
 git add .   # stage the changes
 git status  # check the staged changes
@@ -112,7 +111,7 @@ git commit -m "task0 finished"   # the comment can be anything
 git push --set-upstream origin task0  # up date the task0 branch of the remote repository
 ```
 
-got to the GitHub webpage `https://github.com/PBA-2021S/pba-<username>` . If everything looks good on this page, make a pull request. 
+got to the GitHub webpage `https://github.com/PBA-2021S/pba-makokaz` . If everything looks good on this page, make a pull request. 
 
 ![](../doc/pullrequest.png)
 
@@ -125,13 +124,6 @@ got to the GitHub webpage `https://github.com/PBA-2021S/pba-<username>` . If eve
 
 ## Trouble Shooting
 
-- I mistakenly submit the assignement in the `main` branch
+- I mistakenly submit the assignment in the `main` branch
   - Make a branch `task0` and submit again
-
-
-
-
-
-
-
 
