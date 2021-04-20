@@ -94,7 +94,8 @@ $ cd build
 $ cmake .. 
 $ cmake --build .
 ```
-Update this markdown document by editing `pba-makokaz/task0/README.md` .Please learn the syntax of the markdown document by yourself.
+Then, run the executable by the command `./task0`.
+Update this markdown document by editing `pba-makokaz/task0/README.md`. Please learn the syntax of the markdown document by yourself.
 
 
 
@@ -111,7 +112,7 @@ git commit -m "task0 finished"   # the comment can be anything
 git push --set-upstream origin task0  # up date the task0 branch of the remote repository
 ```
 
-got to the GitHub webpage `https://github.com/PBA-2021S/pba-makokaz` . If everything looks good on this page, make a pull request. 
+got to the GitHub webpage `https://github.com/PBA-2021S/pba-makokaz` and be sure to select the task0 branch. If everything looks good on this page, make a pull request. 
 
 ![](../doc/pullrequest.png)
 
