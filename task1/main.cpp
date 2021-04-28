@@ -94,13 +94,16 @@ void simulate(std::vector<CParticle>& aParticle, float dt)
 			 * https://en.wikipedia.org/wiki/Specular_reflection
 			*/
 
+			/* positional mirroring factor: mirror particle inside obstacle on obstacle boundary */
+			float fmirror = 0.2/dist_from_center;
+
 			/* new position and velocity after collision */
 			p.velo[0] = -2*vnormal*normal[0]+p.velo[0];
 			p.velo[1] = -2*vnormal*normal[1]+p.velo[1];
-			p.pos[0] = 0.2 * normal[0] + 0.5f;
-			p.pos[1] = 0.2 * normal[1] + 0.5f;
-			// p.pos[0] = 0.2*0.2*normal[0]/dist_from_center + 0.5f;
-			// p.pos[1] = 0.2*0.2*normal[1]/dist_from_center + 0.5f;
+			// p.pos[0] = 0.2 * normal[0] + 0.5f;
+			// p.pos[1] = 0.2 * normal[1] + 0.5f;
+			p.pos[0] = 0.2*fmirror*normal[0] + 0.5f;
+			p.pos[1] = 0.2*fmirror*normal[1] + 0.5f;
 
 
 			/**
