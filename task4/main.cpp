@@ -3,12 +3,16 @@
 #include <GLFW/glfw3.h>
 #include <cstdlib>
 #include <cstdio>
-#include <random> // for initial randome position & velocity
+#include <random> // for initial random position & velocity
 #include <algorithm> // for sort
 #include <set> // for stack
 
 #ifndef M_PI
   #define M_PI 3.14159265358979323846
+#endif
+
+#ifndef VERBOSE
+  #define VERBOSE 0
 #endif
 
 // print out error
@@ -21,6 +25,7 @@ public:
   float pos[2] = {0.f, 0.f};
   float velo[2] = {0.f, 0.f};
   bool is_collided = false;
+  bool is_collided_wall = false;
 };
 
 void draw(
@@ -45,8 +50,9 @@ void draw(
   for(const auto & circle : aCircle){
     if( circle.is_collided ){  // if it is collided, color is red
       ::glColor3f(1.f, 0.f, 0.f);
-    }
-    else {
+    } else if (circle.is_collided_wall){ // if it is collided, color is blue
+      ::glColor3f(0.f, 1.f, 0.f);
+    } else {
       ::glColor3f(0.f, 0.f, 0.f);
     }
     ::glBegin(GL_TRIANGLE_FAN);
@@ -65,21 +71,26 @@ void move_circles(
     float dt)
 {
   for(auto & circle : aCircle) {
+    circle.is_collided_wall = false;
     circle.pos[0] += dt * circle.velo[0];
     circle.pos[1] += dt * circle.velo[1];
     if(circle.pos[0] < rad ){ // left wall
+      circle.is_collided_wall = true;
       circle.pos[0] = 2 * rad - circle.pos[0];
       circle.velo[0] = -circle.velo[0];
     }
     if(circle.pos[1] < rad ){ // bottom wall
+      circle.is_collided_wall = true;
       circle.pos[1] = 2 * rad - circle.pos[1];
       circle.velo[1] = -circle.velo[1];
     }
     if(circle.pos[0] > 1 - rad ){ // right wall
+      circle.is_collided_wall = true;
       circle.pos[0] = (1 - rad) * 2 - circle.pos[0];
       circle.velo[0] = -circle.velo[0];
     }
     if(circle.pos[1] > 1 - rad ){ // top wall
+      circle.is_collided_wall = true;
       circle.pos[1] = (1 - rad) * 2 - circle.pos[1];
       circle.velo[1] = -circle.velo[1];
     }
@@ -110,6 +121,8 @@ bool is_collide(
 }
 
 /**
+ * @brief Implements the Sweep & Prune method for collision detection.
+ * @see https://github.com/mattleibow/jitterphysics/wiki/Sweep-and-Prune
  *
  * @param[in,out] aCircle array of particle
  * @param[in] rad radius of the circles
@@ -129,13 +142,31 @@ void collision_detection(
   std::sort(aPosIndex.begin(),aPosIndex.end()); // sort array by quick sort
   std::set<unsigned int> stack;
   for(auto& pi : aPosIndex){
-//    std::cout << pi.p << " " << pi.is_start << " " << pi.icircle << std::endl;
+#if VERBOSE
+    std::cout << pi.p << " " << pi.is_start << " " << pi.icircle << std::endl;
+#endif
     if( pi.is_start ){ // enter the range of the circle
       unsigned int ic0 = pi.icircle;
       // ----------------------------------------------
       // write some codes here (probably 5 - 10 lines)
       // use the function "is_collide()" at line #102
       // ----------------------------------------------
+
+      /**
+       * 1. Iterate over all circles c currently inside the stack
+       * 2. Check if circle c0 collides with any circle c in stack
+       * 3. If collided, set flag 'is_collided=true' of both c and c0
+       * @see https://github.com/mattleibow/jitterphysics/wiki/Sweep-and-Prune
+      */
+      for (auto& ic : stack)
+      {
+        if (is_collide(aCircle[ic], aCircle[ic0], rad))
+        {
+          aCircle[ic].is_collided = true;
+          aCircle[ic0].is_collided = true;
+        }
+      }
+
       stack.insert(ic0);
     }
     else{ // exit the range of the circle
