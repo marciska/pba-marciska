@@ -88,12 +88,12 @@ void optimization_newton(
     const float dx = pos[0] - aXY[ixy * 2 + 0];
     const float dy = pos[1] - aXY[ixy * 2 + 1];
     // write some codes below to compute gradient and hessian of the energy defined in line #60.
-//    gradW[0] +=
-//    gradW[1] +=
-//    hessW[0][0] +=
-//    hessW[0][1] +=
-//    hessW[1][0] +=
-//    hessW[1][1] +=
+    gradW[0] += 2*dx;
+    gradW[1] += 2*dy;
+    hessW[0][0] += 2;
+    hessW[0][1] += 0;
+    hessW[1][0] += 0;
+    hessW[1][1] += 2;
   }
   // below: Newton-Raphson method
   // compute inverse of hessian: (ddW)^{-1}

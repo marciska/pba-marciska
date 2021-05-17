@@ -6,7 +6,7 @@
 
 ## Setting Up
 
-Pleae take a look at the following document for environment setup, creating branch, and making a pull request.
+Please take a look at the following document for environment setup, creating branch, and making a pull request.
 
 [How to Submit the Assignment](../doc/submit.md)
 
@@ -17,7 +17,7 @@ $ cd pba-<username> # go to the top of local repository
 $ git submodule update --init 3rd_party/delfem2
 ```
 
-(DelFEM2 is a collection of useful C++ codes written by the instructer.)
+(DelFEM2 is a collection of useful C++ codes written by the instructor.)
 
 
 
@@ -27,7 +27,8 @@ Compile the code in this folder using `cmake`, use the **out-of-source build** t
 Run the program and take a screenshot image of the resulting window. 
 Paste the screenshot below by editing this markdown document. 
 
-=== paset screenshot here ===
+=== paste screenshot here ===
+![task2_P1_answer](task2_P1_answer.png)
 
 
 
@@ -35,11 +36,11 @@ Paste the screenshot below by editing this markdown document.
 
 Optimize the position of the blue point using the Newton-Raphson method such that it will **minimise the sum of the squared distance between black points**.
 The Newton-Raphson method requires gradient and hessian of the energy with respect to the position. 
-Fill the code around line #90 to **analytically** compute the graiend and hessian of the squared distance. 
+Fill the code around line #90 to **analytically** compute the gradient and hessian of the squared distance. 
 Paste the screenshot image of the result below. 
 
-=== paset screenshot here ===
-
+=== paste screenshot here ===
+![task2_P2_answer](task2_P2_answer.png)
 
 
 
