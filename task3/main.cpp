@@ -54,8 +54,9 @@ DFM2_INLINE void WdWddW_Spring2(
 
   /*
     The code below computes ddC.
-    Note: ddC[ino][jno][idim][jdim] means differentiation of C w.r.t. p[ino][idim] and then p[jno][jdim]
+    Note:  ddC[ino][jno][idim][jdim] means differentiation of C w.r.t. p[ino][idim] and then p[jno][jdim]
     Note2: I am sorry the code is not in the for loop, but I like this style better than using "if-else" in a for-loop.
+    Note3: For how to calculate ddC, refer to: https://blog.mmacklin.com/2012/05/04/implicitsprings/
   */
   double a = (1 - u01[0] * u01[0]) / len;
   double b = u01[0] * u01[1] / len;
