@@ -51,18 +51,81 @@ DFM2_INLINE void WdWddW_Spring2(
       {+u01[0], +u01[1]} };
   double ddC[nnode][nnode][ndim][ndim]; // hessian of C
   std::fill_n(&ddC[0][0][0][0], nnode*nnode*ndim*ndim, 0.0); // currently ddC is zet to zero.
-  for(unsigned int idim=0;idim<ndim;++idim){
-    for(unsigned int jdim=0;jdim<ndim;++jdim) {
+
+  /*
+    The code below computes ddC.
+    Note: ddC[ino][jno][idim][jdim] means differentiation of C w.r.t. p[ino][idim] and then p[jno][jdim]
+    Note2: I am sorry the code is not in the for loop, but I like this style better than using "if-else" in a for-loop.
+  */
+  double a = (1 - u01[0] * u01[0]) / len;
+  double b = u01[0] * u01[1] / len;
+  double c = u01[1] * u01[0] / len;
+  double d = (1 - u01[1] * u01[1]) / len;
+
+  ddC[0][0][0][0] =  a;
+  ddC[0][1][0][0] = -a;
+  ddC[1][0][0][0] = -a;
+  ddC[1][1][0][0] =  a;
+
+  ddC[0][0][0][1] = -b;
+  ddC[0][1][0][1] =  b;
+  ddC[1][0][0][1] =  b;
+  ddC[1][1][0][1] = -b;
+
+  ddC[0][0][1][0] = -c;
+  ddC[0][1][1][0] =  c;
+  ddC[1][0][1][0] =  c;
+  ddC[1][1][1][0] = -c;
+
+  ddC[0][0][1][1] =  d;
+  ddC[0][1][1][1] = -d;
+  ddC[1][0][1][1] = -d;
+  ddC[1][1][1][1] =  d;
+
+  // for(unsigned int idim=0;idim<ndim;++idim){
+  //   for(unsigned int jdim=0;jdim<ndim;++jdim) {
       // write some code below to compute the ddC.
       // ddC[ino][jno][idim][jdim] means differentiation of C w.r.t. p[ino][idim] and then p[jno][jdim]
 
-      ddC[0][0][idim][jdim] = 0; //(1. - u01[0]*u01[0])/len;
-      ddC[0][1][idim][jdim] = u01[1] * u01[0] / len;
-      ddC[1][0][idim][jdim] = -u01[0] * u01[1] / len;
-      ddC[1][1][idim][jdim] = 0; //(1. - u01[1]*u01[1])/len;
-    }
-  }
-  //
+      /*
+        Below, you will find my old solution.
+        I just keep it here for my reference, because it helps me understand my mistake
+        in case I revisit this problem again in the future...
+      */
+      /*
+        Note: Because the spring is a linear system, the second derivative
+        ddC[0,0] and ddC[1,1] must be zero.
+        In fact, only the non-diagonal elements have a second derivative != 0.
+      */
+      // ddC[0][0][idim][jdim] = 0;
+      // ddC[0][1][idim][jdim] = -(u01[0]*ap[0][0] - 1./len); //u01[1] * u01[0] / len;
+      // ddC[1][0][idim][jdim] = -(u01[0]*ap[0][0] + 1./len); //-u01[0] * u01[1] / len;
+      // ddC[1][1][idim][jdim] = 0;
+
+      // double sign = ()? 1 : -1;
+      // ddC[0][0][idim][jdim] = (1-u01[0]*u01[0])/ len;
+      // ddC[0][1][idim][jdim] = u01[1] * u01[0] / len;
+      // ddC[1][0][idim][jdim] = u01[0] * u01[1] / len;
+      // ddC[1][1][idim][jdim] = (1-u01[0]*u01[0])/ len;
+
+      // ddC[0][0][idim][jdim] = 0;
+      // ddC[1][1][idim][jdim] = 0;
+
+      // ddC[0][1][0][0] = -u01[1] * u01[0] / len;
+      // ddC[1][0][0][0] = -u01[0] * u01[1] / len;
+
+      // ddC[0][1][1][0] = u01[1] * u01[0] / len;
+      // ddC[1][0][1][0] = -u01[0] * u01[1] / len;
+
+      // ddC[0][1][0][1] = -u01[1] * u01[0] / len;
+      // ddC[1][0][0][1] = u01[0] * u01[1] / len;
+
+      // ddC[0][1][1][1] = u01[1] * u01[0] / len;
+      // ddC[1][0][1][1] = u01[0] * u01[1] / len;
+  //   }
+  // }
+
+  // Compute W, dW, ddW
   W = 0.5 * stiffness * C * C; // Hooke's law. energy is square of length difference W=1/2*k*C*C
   for(int ino=0; ino < nnode; ++ino){
     for(int idim=0;idim < ndim;++idim){
