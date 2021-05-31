@@ -7,7 +7,7 @@
 
 ## Setting Up
 
-Pleae look at the following document for environment setup, creating branch, and making pull request.
+Please look at the following document for environment setup, creating branch, and making pull request.
 
 [How to Submit the Assignment](../doc/submit.md)
 
@@ -18,7 +18,7 @@ $ cd pba-<username> # go to the top of local repository
 $ git submodule update --init 3rd_party/delfem2
 ```
 
-(DelFEM2 is a collection of useful C++ codes written by the instructer).
+(DelFEM2 is a collection of useful C++ codes written by the instructor).
 
 
 
@@ -27,7 +27,7 @@ $ git submodule update --init 3rd_party/delfem2
 Build the `main.cpp` using `cmake`. Run the program and take a screenshot image of the window. You will probably see some **highly distorted** mesh and that's OK. Paste the screenshot image below by editing this mark down document:
 
 === paste screenshot here ===
-
+![task5_P1_answer.png](task5_P1_answer.png)
 
 
 
@@ -47,8 +47,7 @@ The one-ring neighbourhood of vertices are stored inside `Psup_Ind` and `Psup` i
 Write some code around line #31 in the `main.cpp`. **Once the implementation is successful, the energy should steadly decrease.** Paste the resulting screenshot image below. 
 
 === paste screenshot image here ===
-
-  
+![task5_P2_answer.png](task5_P2_answer.png)
 
 
 
