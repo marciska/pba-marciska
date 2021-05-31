@@ -29,13 +29,13 @@ void GaussSeidelRelaxation(
     double pos_new[2] = {0., 0.}; // new coordinate. Put it at the center of gravity of the neighbouring points
     for (auto ipsup = aPsupInd[ip]; ipsup < aPsupInd[ip + 1]; ++ipsup) {
       const unsigned int jp = aPsup[ipsup]; // index of point neighbouring ip
-      // write something here
-      // write something here
+      pos_new[0] += aXY[jp*2+0]/nneighbour; // write something here
+      pos_new[1] += aXY[jp*2+1]/nneighbour; // write something here
     }
     // write something here
     // un-comment below
-    // aXY[ip*2+0] = pos_new[0]; // update the x-coordinate of ip
-    // aXY[ip*2+1] = pos_new[1]; // update the y-coordinate of ip
+    aXY[ip*2+0] = pos_new[0]; // update the x-coordinate of ip
+    aXY[ip*2+1] = pos_new[1]; // update the y-coordinate of ip
   }
 }
 
