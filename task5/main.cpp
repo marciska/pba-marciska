@@ -74,6 +74,60 @@ void JacobiRelaxation(
 }
 
 /**
+ * Optimize the position of the mesh to reduce the energy
+ * energy is defined as the sum of squared lengths of the edges of the mesh
+ * @param[in,out] aXY array of coordinates
+ * @param[in,out] rk array of coordinates
+ * @param[in,out] pk array of coordinates
+ * @param[in] aPsupInd array of index for jagged array
+ * @param[in] aPsup array of neighbouring index for jagged array
+ * @param[in] aBCFlag if BCFlag is not 0, that point needs to be fixed.
+ */
+void KrylovRelaxation(
+    std::vector<double> &aXY,
+    std::vector<double> &rk,
+    std::vector<double> &pk,
+    const std::vector<unsigned int> &aPsupInd,
+    const std::vector<unsigned int> &aPsup,
+    const std::vector<int> &aBCFlag)
+{
+  const auto np = aXY.size() / 2;
+  /* Calculate alphak */
+  double rksum[2] = {0., 0.};
+  double pksum[2] = {0., 0.};
+  for (auto ip=0; ip<np; ++ip) { // loop over all the point
+    if( aBCFlag[ip] != 0 ) { continue; }
+    rksum[0] += rk[2*ip+0]*rk[2*ip+0];
+    rksum[1] += rk[2*ip+1]*rk[2*ip+1];
+    pksum[0] += pk[2*ip+0]*pk[2*ip+0];
+    pksum[1] += pk[2*ip+1]*pk[2*ip+1];
+  }
+  double alphak[2] = {rksum[0]/pksum[0], rksum[1]/pksum[1]};
+  /* Calculate xk+1, rk+1 */
+  for (auto ip=0; ip<np; ++ip) { // loop over all the point
+    if( aBCFlag[ip] != 0 ) { continue; }
+    aXY[ip*2+0] += alphak[0]*pk[ip*2+0];
+    aXY[ip*2+1] += alphak[1]*pk[ip*2+1];
+    /* TODO: The bug is here. At k=0 iteration, r0 == p0. Hence, alpha0 = 1. However, then r1 = r0 - alpha0*p0 = 0 */
+    rk[ip*2+0] -= alphak[0]*pk[ip*2+0];
+    rk[ip*2+1] -= alphak[1]*pk[ip*2+1];
+  }
+  /* Calculate betak */
+  double betak[2] = {0., 0.};
+  for (auto ip=0; ip<np; ++ip) { // loop over all the point
+    if( aBCFlag[ip] != 0 ) { continue; }
+    betak[0] += rk[2*ip+0]*rk[2*ip+0]/rksum[0];
+    betak[1] += rk[2*ip+1]*rk[2*ip+1]/rksum[1];
+  }
+  /* Calculate pk+1 */
+  for (auto ip=0; ip<np; ++ip) { // loop over all the point
+    if( aBCFlag[ip] != 0 ) { continue; }
+    pk[ip*2+0] = rk[2*ip+0] + betak[0]*pk[ip*2+0];
+    pk[ip*2+1] = rk[2*ip+1] + betak[1]*pk[ip*2+1];
+  }
+}
+
+/**
  * Compute the energy that is defined as the sum of squared lengths of the edges of the mesh
  * @param[in] aXY array of coordinates
  * @param[in] aPsupInd array of index for jagged array
@@ -186,6 +240,18 @@ int main()
   // ------
   viewer.InitGL();
 
+  /* Some pre-defines for Krylov method */
+  // std::vector<double> rk = aXY;
+  // std::vector<double> pk = rk;
+  // for (auto ip = 0; ip < aXY.size()/2; ++ip)
+  // { // loop over all the point
+  //   if( aBCFlag[ip] != 0 ){ continue; }
+  //   const unsigned int nneighbour = aPsupInd[ip + 1] - aPsupInd[ip]; // number of points neighbouring ip
+  //   if( nneighbour == 0 ){ continue; }
+  //   aXY[ip*2+0] = 0.;
+  //   aXY[ip*2+1] = 0.;
+  // }
+
   double time_last_update = 0.0;
   const double dt = 1.0/60.0;
   while (!glfwWindowShouldClose(viewer.window)) {
@@ -203,6 +269,7 @@ int main()
     /* Iterative Solver */
     GaussSeidelRelaxation(aXY, aPsupInd, aPsup, aBCFlag);
     // JacobiRelaxation(aXY, aPsupInd, aPsup, aBCFlag);
+    // KrylovRelaxation(aXY, rk, pk, aPsupInd, aPsup, aBCFlag);
 
     //----
     viewer.DrawBegin_oldGL();

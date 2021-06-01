@@ -44,7 +44,7 @@ The one-ring neighbourhood of vertices are stored inside `Psup_Ind` and `Psup` i
 ![jagged_array](jagged_array1.png)
 
 
-Write some code around line #31 in the `main.cpp`. **Once the implementation is successful, the energy should steadly decrease.** Paste the resulting screenshot image below. 
+Write some code around line #31 in the `main.cpp`. **Once the implementation is successful, the energy should steadily decrease.** Paste the resulting screenshot image below. 
 
 === paste screenshot image here ===
 ![task5_P2_answer.png](task5_P2_answer.png)
@@ -52,8 +52,9 @@ Write some code around line #31 in the `main.cpp`. **Once the implementation is 
 
 ## Extension
 
-Also implemented Jacobi method.
-Check it out by uncomenting `line 205`.
+Also implemented the following solvers:
+- Jacobi method: Check it out by un-commenting `line 271`.
+- ( **TODO; Bug** ) Krylov method: Check it out by un-commenting `lines 244--253` and `line 272`.
 
 
 
