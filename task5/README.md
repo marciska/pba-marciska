@@ -50,7 +50,10 @@ Write some code around line #31 in the `main.cpp`. **Once the implementation is 
 ![task5_P2_answer.png](task5_P2_answer.png)
 
 
+## Extension
 
+Also implemented Jacobi method.
+Check it out by uncomenting `line 205`.
 
 
 

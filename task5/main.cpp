@@ -40,6 +40,40 @@ void GaussSeidelRelaxation(
 }
 
 /**
+ * Optimize the position of the mesh to reduce the energy
+ * energy is defined as the sum of squared lengths of the edges of the mesh
+ * @param[in,out] aXY array of coordinates
+ * @param[in] aPsupInd array of index for jagged array
+ * @param[in] aPsup array of neighbouring index for jagged array
+ * @param[in] aBCFlag if BCFlag is not 0, that point needs to be fixed.
+ */
+void JacobiRelaxation(
+    std::vector<double> &aXY,
+    const std::vector<unsigned int> &aPsupInd,
+    const std::vector<unsigned int> &aPsup,
+    const std::vector<int> &aBCFlag)
+{
+  const auto np = aXY.size() / 2;
+  std::vector<double> aXY_new = aXY;
+  /* Step1: Solve each row independently to obtain x' */
+  for (auto ip = 0; ip < np; ++ip)
+  { // loop over all the point
+    if( aBCFlag[ip] != 0 ){ continue; }
+    const unsigned int nneighbour = aPsupInd[ip + 1] - aPsupInd[ip]; // number of points neighbouring ip
+    if( nneighbour == 0 ){ continue; }
+    aXY_new[ip*2+0] = 0.;
+    aXY_new[ip*2+1] = 0.;
+    for (auto ipsup = aPsupInd[ip]; ipsup < aPsupInd[ip + 1]; ++ipsup) {
+      const unsigned int jp = aPsup[ipsup]; // index of point neighbouring ip
+      aXY_new[ip*2+0] += aXY[jp*2+0]/nneighbour;
+      aXY_new[ip*2+1] += aXY[jp*2+1]/nneighbour;
+    }
+  }
+  /* Step2: Set x = x' */
+  aXY = aXY_new;
+}
+
+/**
  * Compute the energy that is defined as the sum of squared lengths of the edges of the mesh
  * @param[in] aXY array of coordinates
  * @param[in] aPsupInd array of index for jagged array
@@ -165,9 +199,11 @@ int main()
     }
     //
     std::cout << "number of points: " << aXY.size()/2 << ",  energy: " << Energy(aXY,aPsupInd,aPsup) << std::endl;
-    GaussSeidelRelaxation(
-        aXY,
-        aPsupInd, aPsup,aBCFlag);
+
+    /* Iterative Solver */
+    GaussSeidelRelaxation(aXY, aPsupInd, aPsup, aBCFlag);
+    // JacobiRelaxation(aXY, aPsupInd, aPsup, aBCFlag);
+
     //----
     viewer.DrawBegin_oldGL();
     glColor3f(0.f, 0.f, 0.f);
