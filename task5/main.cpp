@@ -92,38 +92,54 @@ void KrylovRelaxation(
     const std::vector<int> &aBCFlag)
 {
   const auto np = aXY.size() / 2;
-  /* Calculate alphak */
-  double rksum[2] = {0., 0.};
-  double pksum[2] = {0., 0.};
+  /* Calculate L * pk */
+  std::vector<double> Lpk(np*2, 0.0);
   for (auto ip=0; ip<np; ++ip) { // loop over all the point
     if( aBCFlag[ip] != 0 ) { continue; }
-    rksum[0] += rk[2*ip+0]*rk[2*ip+0];
-    rksum[1] += rk[2*ip+1]*rk[2*ip+1];
-    pksum[0] += pk[2*ip+0]*pk[2*ip+0];
-    pksum[1] += pk[2*ip+1]*pk[2*ip+1];
+    const unsigned int nneighbour = aPsupInd[ip + 1] - aPsupInd[ip]; // number of points neighbouring ip
+    if( nneighbour == 0 ){ continue; }
+    Lpk[2*ip+0] = nneighbour*pk[2*ip+0];
+    Lpk[2*ip+1] = nneighbour*pk[2*ip+1];
+    for (auto ipsup = aPsupInd[ip]; ipsup < aPsupInd[ip + 1]; ++ipsup) {
+      const unsigned int jp = aPsup[ipsup]; // index of point neighbouring ip
+      Lpk[2*ip+0] -= pk[2*jp+0];
+      Lpk[2*ip+1] -= pk[2*jp+1];
+    }
   }
-  double alphak[2] = {rksum[0]/pksum[0], rksum[1]/pksum[1]};
-  /* Calculate xk+1, rk+1 */
+  /* Calculate alphak */
+  double rksum = 0.;
+  double pksum = 0.;
   for (auto ip=0; ip<np; ++ip) { // loop over all the point
     if( aBCFlag[ip] != 0 ) { continue; }
-    aXY[ip*2+0] += alphak[0]*pk[ip*2+0];
-    aXY[ip*2+1] += alphak[1]*pk[ip*2+1];
-    /* TODO: The bug is here. At k=0 iteration, r0 == p0. Hence, alpha0 = 1. However, then r1 = r0 - alpha0*p0 = 0 */
-    rk[ip*2+0] -= alphak[0]*pk[ip*2+0];
-    rk[ip*2+1] -= alphak[1]*pk[ip*2+1];
+    /* Calculate rksum = rk^T * rk */
+    rksum += rk[2*ip+0]*rk[2*ip+0] + rk[2*ip+1]*rk[2*ip+1];
+    /* Calculate pksum = pk^T * Lpk */
+    pksum += pk[2*ip+0]*Lpk[2*ip+0] + pk[2*ip+1]*Lpk[2*ip+1];
+  }
+  double alphak = rksum/pksum;
+  /* Calculate xk+1 = xk + alphak * pk */
+  for (auto ip=0; ip<np; ++ip) { // loop over all the point
+    if( aBCFlag[ip] != 0 ) { continue; }
+    aXY[ip*2+0] += alphak*pk[ip*2+0];
+    aXY[ip*2+1] += alphak*pk[ip*2+1];
+  }
+  /* Calculate rk+1 = rk - alphak * L * pk */
+  for (auto ip=0; ip<np; ++ip) { // loop over all the point
+    if( aBCFlag[ip] != 0 ) { continue; }
+    rk[2*ip+0] -= alphak*Lpk[2*ip+0];
+    rk[2*ip+1] -= alphak*Lpk[2*ip+1];
   }
   /* Calculate betak */
-  double betak[2] = {0., 0.};
+  double betak = 0.;
   for (auto ip=0; ip<np; ++ip) { // loop over all the point
     if( aBCFlag[ip] != 0 ) { continue; }
-    betak[0] += rk[2*ip+0]*rk[2*ip+0]/rksum[0];
-    betak[1] += rk[2*ip+1]*rk[2*ip+1]/rksum[1];
+    betak += (rk[2*ip+0]*rk[2*ip+0]+rk[2*ip+1]*rk[2*ip+1])/rksum;
   }
   /* Calculate pk+1 */
   for (auto ip=0; ip<np; ++ip) { // loop over all the point
     if( aBCFlag[ip] != 0 ) { continue; }
-    pk[ip*2+0] = rk[2*ip+0] + betak[0]*pk[ip*2+0];
-    pk[ip*2+1] = rk[2*ip+1] + betak[1]*pk[ip*2+1];
+    pk[ip*2+0] = rk[2*ip+0] + betak*pk[ip*2+0];
+    pk[ip*2+1] = rk[2*ip+1] + betak*pk[ip*2+1];
   }
 }
 
@@ -227,11 +243,26 @@ int main()
       aXY[ip*2+1] += 0.5*dist_m1p1(rndeng);
     }
   }
-  //
+
+  // Copy aXY for other solvers
+  std::vector<double> aXY2 = aXY;
+  std::vector<double> aXY3 = aXY;
+
+  // Define windows
   delfem2::glfw::CViewer2 viewer;
   {
     viewer.view_height = 1.2;
-    viewer.title = "task5: Solving Large Linear System";
+    viewer.title = "task5: Solving Large Linear System - Gauss-Seidel";
+  }
+  delfem2::glfw::CViewer2 viewer2;
+  {
+    viewer2.view_height = 1.2;
+    viewer2.title = "task5: Solving Large Linear System - Jacobi";
+  }
+  delfem2::glfw::CViewer2 viewer3;
+  {
+    viewer3.view_height = 1.2;
+    viewer3.title = "task52: Solving Large Linear System - Krylov";
   }
   glfwSetErrorCallback(error_callback);
   if ( !glfwInit() ) { exit(EXIT_FAILURE); }
@@ -239,22 +270,25 @@ int main()
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
   // ------
   viewer.InitGL();
+  viewer2.InitGL();
+  viewer3.InitGL();
 
   /* Some pre-defines for Krylov method */
-  // std::vector<double> rk = aXY;
-  // std::vector<double> pk = rk;
-  // for (auto ip = 0; ip < aXY.size()/2; ++ip)
-  // { // loop over all the point
-  //   if( aBCFlag[ip] != 0 ){ continue; }
-  //   const unsigned int nneighbour = aPsupInd[ip + 1] - aPsupInd[ip]; // number of points neighbouring ip
-  //   if( nneighbour == 0 ){ continue; }
-  //   aXY[ip*2+0] = 0.;
-  //   aXY[ip*2+1] = 0.;
-  // }
+  std::vector<double> rk = aXY3;
+  std::vector<double> pk = rk;
+  for (auto ip = 0; ip < aXY3.size()/2; ++ip)
+  { // loop over all the point
+    if( aBCFlag[ip] != 0 ){ continue; }
+    const unsigned int nneighbour = aPsupInd[ip + 1] - aPsupInd[ip]; // number of points neighbouring ip
+    if( nneighbour == 0 ){ continue; }
+    aXY3[ip*2+0] = 0.;
+    aXY3[ip*2+1] = 0.;
+  }
 
   double time_last_update = 0.0;
   const double dt = 1.0/60.0;
-  while (!glfwWindowShouldClose(viewer.window)) {
+  while (!glfwWindowShouldClose(viewer.window) && !glfwWindowShouldClose(viewer2.window) && !glfwWindowShouldClose(viewer3.window))
+  {
     { // frame rate control
       const double time_now = glfwGetTime();
       if (time_now - time_last_update < dt) {
@@ -264,21 +298,37 @@ int main()
       time_last_update = time_now;
     }
     //
-    std::cout << "number of points: " << aXY.size()/2 << ",  energy: " << Energy(aXY,aPsupInd,aPsup) << std::endl;
+    std::cout << "number of points: " << aXY.size() / 2 << ",  energy (Gauss-Seidel): " << Energy(aXY, aPsupInd, aPsup)
+                                                        << ",  energy (Jacobi): " << Energy(aXY2, aPsupInd, aPsup)
+                                                        << ",  energy (Krylov): " << Energy(aXY3, aPsupInd, aPsup) << std::endl;
 
     /* Iterative Solver */
     GaussSeidelRelaxation(aXY, aPsupInd, aPsup, aBCFlag);
-    // JacobiRelaxation(aXY, aPsupInd, aPsup, aBCFlag);
-    // KrylovRelaxation(aXY, rk, pk, aPsupInd, aPsup, aBCFlag);
+    JacobiRelaxation(aXY2, aPsupInd, aPsup, aBCFlag);
+    KrylovRelaxation(aXY3, rk, pk, aPsupInd, aPsup, aBCFlag);
 
-    //----
+    //---- Gauss-Seidel
     viewer.DrawBegin_oldGL();
     glColor3f(0.f, 0.f, 0.f);
     DrawMesh2_Psup(aXY, aPsupInd, aPsup);
     viewer.SwapBuffers();
+
+    //---- Jacobi
+    viewer2.DrawBegin_oldGL();
+    glColor3f(0.f, 0.f, 0.f);
+    DrawMesh2_Psup(aXY2, aPsupInd, aPsup);
+    viewer2.SwapBuffers();
     glfwPollEvents();
+
+    //---- Krylov
+    viewer3.DrawBegin_oldGL();
+    glColor3f(0.f, 0.f, 0.f);
+    DrawMesh2_Psup(aXY3, aPsupInd, aPsup);
+    viewer3.SwapBuffers();
   }
   glfwDestroyWindow(viewer.window);
+  glfwDestroyWindow(viewer2.window);
+  glfwDestroyWindow(viewer3.window);
   glfwTerminate();
   exit(EXIT_SUCCESS);
 }

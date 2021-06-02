@@ -53,8 +53,8 @@ Write some code around line #31 in the `main.cpp`. **Once the implementation is 
 ## Extension
 
 Also implemented the following solvers:
-- Jacobi method: Check it out by un-commenting `line 271`.
-- ( **TODO; Bug** ) Krylov method: Check it out by un-commenting `lines 244--253` and `line 272`.
+- Jacobi method
+- ( **TODO; Bug** ) Krylov method
 
 
 
