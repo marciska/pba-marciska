@@ -54,7 +54,7 @@ Write some code around line #31 in the `main.cpp`. **Once the implementation is 
 
 Also implemented the following solvers:
 - Jacobi method
-- ( **TODO; Bug** ) Krylov method
+- Krylov method
 
 
 

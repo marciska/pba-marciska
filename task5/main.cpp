@@ -29,11 +29,9 @@ void GaussSeidelRelaxation(
     double pos_new[2] = {0., 0.}; // new coordinate. Put it at the center of gravity of the neighbouring points
     for (auto ipsup = aPsupInd[ip]; ipsup < aPsupInd[ip + 1]; ++ipsup) {
       const unsigned int jp = aPsup[ipsup]; // index of point neighbouring ip
-      pos_new[0] += aXY[jp*2+0]/nneighbour; // write something here
-      pos_new[1] += aXY[jp*2+1]/nneighbour; // write something here
+      pos_new[0] += aXY[jp*2+0]/nneighbour;
+      pos_new[1] += aXY[jp*2+1]/nneighbour;
     }
-    // write something here
-    // un-comment below
     aXY[ip*2+0] = pos_new[0]; // update the x-coordinate of ip
     aXY[ip*2+1] = pos_new[1]; // update the y-coordinate of ip
   }
@@ -74,6 +72,37 @@ void JacobiRelaxation(
 }
 
 /**
+ * Calculates the matrix vector product y=L*x,
+ * with L the Laplacian matrix
+ * @param[in,out] y array of coordinates
+ * @param[in] x array of coordinates
+ * @param[in] aPsupInd array of index for jagged array
+ * @param[in] aPsup array of neighbouring index for jagged array
+ * @param[in] aBCFlag if BCFlag is not 0, that point needs to be fixed.
+ */
+void Lapdot(
+    std::vector<double> &y,
+    std::vector<double> &x,
+    const std::vector<unsigned int> &aPsupInd,
+    const std::vector<unsigned int> &aPsup,
+    const std::vector<int> &aBCFlag)
+{
+  const auto np = x.size() / 2;
+  for (auto ip=0; ip<np; ++ip) { // loop over all the point
+    if( aBCFlag[ip] != 0 ) { continue; }
+    const unsigned int nneighbour = aPsupInd[ip + 1] - aPsupInd[ip]; // number of points neighbouring ip
+    if( nneighbour == 0 ){ continue; }
+    y[2*ip+0] = nneighbour*x[2*ip+0];
+    y[2*ip+1] = nneighbour*x[2*ip+1];
+    for (auto ipsup = aPsupInd[ip]; ipsup < aPsupInd[ip + 1]; ++ipsup) {
+      const unsigned int jp = aPsup[ipsup]; // index of point neighbouring ip
+      y[2*ip+0] -= x[2*jp+0];
+      y[2*ip+1] -= x[2*jp+1];
+    }
+  }
+}
+
+/**
  * Optimize the position of the mesh to reduce the energy
  * energy is defined as the sum of squared lengths of the edges of the mesh
  * @param[in,out] aXY array of coordinates
@@ -94,18 +123,7 @@ void KrylovRelaxation(
   const auto np = aXY.size() / 2;
   /* Calculate L * pk */
   std::vector<double> Lpk(np*2, 0.0);
-  for (auto ip=0; ip<np; ++ip) { // loop over all the point
-    if( aBCFlag[ip] != 0 ) { continue; }
-    const unsigned int nneighbour = aPsupInd[ip + 1] - aPsupInd[ip]; // number of points neighbouring ip
-    if( nneighbour == 0 ){ continue; }
-    Lpk[2*ip+0] = nneighbour*pk[2*ip+0];
-    Lpk[2*ip+1] = nneighbour*pk[2*ip+1];
-    for (auto ipsup = aPsupInd[ip]; ipsup < aPsupInd[ip + 1]; ++ipsup) {
-      const unsigned int jp = aPsup[ipsup]; // index of point neighbouring ip
-      Lpk[2*ip+0] -= pk[2*jp+0];
-      Lpk[2*ip+1] -= pk[2*jp+1];
-    }
-  }
+  Lapdot(Lpk,pk,aPsupInd,aPsup,aBCFlag);
   /* Calculate alphak */
   double rksum = 0.;
   double pksum = 0.;
@@ -273,20 +291,22 @@ int main()
   viewer2.InitGL();
   viewer3.InitGL();
 
-  /* Some pre-defines for Krylov method */
-  std::vector<double> rk = aXY3;
-  std::vector<double> pk = rk;
+  /* Some pre-defines for Krylov method: p0 = r0 = -L*x0 */
+  std::vector<double> rk(aXY3.size(), 0.0);
+  Lapdot(rk,aXY3,aPsupInd,aPsup,aBCFlag); // = L*x0
   for (auto ip = 0; ip < aXY3.size()/2; ++ip)
-  { // loop over all the point
+  { // invert all points: rk = - (L*x0)
     if( aBCFlag[ip] != 0 ){ continue; }
     const unsigned int nneighbour = aPsupInd[ip + 1] - aPsupInd[ip]; // number of points neighbouring ip
     if( nneighbour == 0 ){ continue; }
-    aXY3[ip*2+0] = 0.;
-    aXY3[ip*2+1] = 0.;
+    rk[ip*2+0] = -rk[ip*2+0];
+    rk[ip*2+1] = -rk[ip*2+1];
   }
+  std::vector<double> pk = rk;
 
   double time_last_update = 0.0;
   const double dt = 1.0/60.0;
+  int iter = 0;
   while (!glfwWindowShouldClose(viewer.window) && !glfwWindowShouldClose(viewer2.window) && !glfwWindowShouldClose(viewer3.window))
   {
     { // frame rate control
@@ -305,7 +325,14 @@ int main()
     /* Iterative Solver */
     GaussSeidelRelaxation(aXY, aPsupInd, aPsup, aBCFlag);
     JacobiRelaxation(aXY2, aPsupInd, aPsup, aBCFlag);
-    KrylovRelaxation(aXY3, rk, pk, aPsupInd, aPsup, aBCFlag);
+    /*Note:
+      It is known that Krylov method achieves the correct solution after _at most_ np iterations.
+      If we iterate too long, we get into numerical issues, since the vector update step size approaches zero.
+      Hence, to solve the issue of dividing by zero, we simply stop the algorithm after np iterations!
+      @see here: https://en.wikipedia.org/wiki/Conjugate_gradient_method
+    */
+    if (iter <= aXY3.size()/2) { KrylovRelaxation(aXY3, rk, pk, aPsupInd, aPsup, aBCFlag); }
+
 
     //---- Gauss-Seidel
     viewer.DrawBegin_oldGL();
@@ -325,6 +352,8 @@ int main()
     glColor3f(0.f, 0.f, 0.f);
     DrawMesh2_Psup(aXY3, aPsupInd, aPsup);
     viewer3.SwapBuffers();
+
+    iter++;
   }
   glfwDestroyWindow(viewer.window);
   glfwDestroyWindow(viewer2.window);
