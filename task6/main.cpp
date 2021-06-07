@@ -7,6 +7,8 @@
 #include <Eigen/Core>
 #include <Eigen/LU>
 
+#include <iomanip>
+
 /**
 * Area of the triangle connecting given two points and the origin, together with gradient and hessian of area.
 * @param[out] W area
@@ -105,17 +107,44 @@ void Optimize(
     // write some codes below
     for(int idim=0;idim<2;++idim) {
       for(int jdim=0;jdim<2;++jdim) {
-        matA(ip0 * 2 + idim, ip0 * 2 + jdim) += ddW[0][0][idim][jdim];
-        matA(ip0 * 2 + idim, ip1 * 2 + jdim) += ddW[0][1][idim][jdim];
-        matA(ip1 * 2 + idim, ip0 * 2 + jdim) += ddW[1][0][idim][jdim];
-        matA(ip1 * 2 + idim, ip1 * 2 + jdim) += ddW[1][1][idim][jdim];
+        /* Upper-Left block of DeltaH */
+        matA(ip0 * 2 + idim, ip0 * 2 + jdim) += ddW[0][0][idim][jdim] - lambda*ddG[0][0][idim][jdim];
+        matA(ip0 * 2 + idim, ip1 * 2 + jdim) += ddW[0][1][idim][jdim] - lambda*ddG[0][1][idim][jdim];
+        matA(ip1 * 2 + idim, ip0 * 2 + jdim) += ddW[1][0][idim][jdim] - lambda*ddG[1][0][idim][jdim];
+        matA(ip1 * 2 + idim, ip1 * 2 + jdim) += ddW[1][1][idim][jdim] - lambda*ddG[1][1][idim][jdim];
       }
-      vecB(ip0*2+idim) += dW[0][idim];
-      vecB(ip1*2+idim) += dW[1][idim];
+      /* Upper-Right block/vector of DeltaH: Delta g(x) */
+      matA(ip0 * 2 + idim, np * 2) += -dG[0][idim];
+      matA(ip1 * 2 + idim, np * 2) += -dG[1][idim];
+      /* Lower-Left block/vector of DeltaH: -Delta g(x) */
+      matA(np * 2, ip0 * 2 + idim) +=  dG[0][idim];
+      matA(np * 2, ip1 * 2 + idim) +=  dG[1][idim];
+
+      /* Upper vector of H */
+      vecB(ip0*2+idim) += dW[0][idim] - lambda*dG[0][idim];
+      vecB(ip1*2+idim) += dW[1][idim] - lambda*dG[1][idim];
       // write something around here to put the areal constraint
       // Note that the "np*2"-th DoF is for the Lagrange multiplier
     }
+    /* Lower vector of H */
+    vecB(np*2) += G;
   }
+
+  /* TESTING */
+  // std::setprecision(2);
+  // std::cout.precision(2);
+  // std::cout.setf(std::ios::fixed, std::ios::floatfield); // set fixed floating format
+  // std::cout.precision(3); // for fixed format, two decimal places
+  
+  // for(auto i=0;i<np*2+1;++i){
+  //   for(int j=0;j<np*2+1;++j){
+  //     std::cout << matA(i,j) << " ";
+  //   }
+  //   std::cout << std::endl;
+  // }
+  // for(int i=0;i<np*2+1;++i){
+  //   std::cout << vecB(i) << std::endl;
+  // }
 
   // no further modification below
   // ---------------
