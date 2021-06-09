@@ -113,12 +113,12 @@ void Optimize(
         matA(ip1 * 2 + idim, ip0 * 2 + jdim) += ddW[1][0][idim][jdim] - lambda*ddG[1][0][idim][jdim];
         matA(ip1 * 2 + idim, ip1 * 2 + jdim) += ddW[1][1][idim][jdim] - lambda*ddG[1][1][idim][jdim];
       }
-      /* Upper-Right block/vector of DeltaH: Delta g(x) */
+      /* Upper-Right block/vector of DeltaH: -Delta g(x) */
       matA(ip0 * 2 + idim, np * 2) += -dG[0][idim];
       matA(ip1 * 2 + idim, np * 2) += -dG[1][idim];
-      /* Lower-Left block/vector of DeltaH: -Delta g(x) */
-      matA(np * 2, ip0 * 2 + idim) +=  dG[0][idim];
-      matA(np * 2, ip1 * 2 + idim) +=  dG[1][idim];
+      /* Lower-Left block/vector of DeltaH:  -Delta g(x) */
+      matA(np * 2, ip0 * 2 + idim) += -dG[0][idim];
+      matA(np * 2, ip1 * 2 + idim) += -dG[1][idim];
 
       /* Upper vector of H */
       vecB(ip0*2+idim) += dW[0][idim] - lambda*dG[0][idim];
@@ -127,7 +127,7 @@ void Optimize(
       // Note that the "np*2"-th DoF is for the Lagrange multiplier
     }
     /* Lower vector of H */
-    vecB(np*2) += G;
+    vecB(np*2) += -G;
   }
 
   /* TESTING */
@@ -135,7 +135,7 @@ void Optimize(
   // std::cout.precision(2);
   // std::cout.setf(std::ios::fixed, std::ios::floatfield); // set fixed floating format
   // std::cout.precision(3); // for fixed format, two decimal places
-  
+
   // for(auto i=0;i<np*2+1;++i){
   //   for(int j=0;j<np*2+1;++j){
   //     std::cout << matA(i,j) << " ";
