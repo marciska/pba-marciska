@@ -102,9 +102,9 @@ void Optimize(
         G, dG, ddG,
         aP);
     G_sum += G;
+
     // making corff. matrix and rhs vector
     // ---------------
-    // write some codes below
     for(int idim=0;idim<2;++idim) {
       for(int jdim=0;jdim<2;++jdim) {
         /* Upper-Left block of DeltaH */
@@ -123,19 +123,22 @@ void Optimize(
       /* Upper vector of H */
       vecB(ip0*2+idim) += dW[0][idim] - lambda*dG[0][idim];
       vecB(ip1*2+idim) += dW[1][idim] - lambda*dG[1][idim];
-      // write something around here to put the areal constraint
-      // Note that the "np*2"-th DoF is for the Lagrange multiplier
     }
-    /* Lower vector of H */
-    vecB(np*2) += -G;
   }
+  /* Lower vector of H, aerial constraint for Lagrange multiplier */
+  vecB(np * 2) = 1 - G_sum; /* Do never forget this!!!: I thought the aerial constraint is already calculated inside the WdWddW_Area2() function,
+                                so G_sum = g(x) is simply our constrained (as shown on the lecture slide).
+                                However, the task says the aerial constraint is given as 1 and we need to implement it, so my mistake was here.
+                                That means, it is not vecB(end) = H(end) == 0   => -g(x) = 0,
+                                but actually vecB(end) = H(end) == -1  => -g(x) = -1.
+                                Hence, vecB(end) = 1 - g(x)
+                            */
 
   /* TESTING */
   // std::setprecision(2);
   // std::cout.precision(2);
   // std::cout.setf(std::ios::fixed, std::ios::floatfield); // set fixed floating format
   // std::cout.precision(3); // for fixed format, two decimal places
-
   // for(auto i=0;i<np*2+1;++i){
   //   for(int j=0;j<np*2+1;++j){
   //     std::cout << matA(i,j) << " ";
@@ -146,7 +149,6 @@ void Optimize(
   //   std::cout << vecB(i) << std::endl;
   // }
 
-  // no further modification below
   // ---------------
 
   // damp the update by adding diagonal
