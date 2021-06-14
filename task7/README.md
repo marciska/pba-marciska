@@ -7,7 +7,7 @@
 
 ## Setting Up
 
-Pleae look at the following document for environment setup, creating branch, and making pull request.
+Please look at the following document for environment setup, creating branch, and making pull request.
 
 - [How to Submit the Assignment](../doc/submit.md)
 
@@ -22,7 +22,7 @@ $ cd pba-<username> # go to the top of local repository
 $ git submodule update --init 3rd_party/delfem2
 ```
 
-(DelFEM2 is a collection of useful C++ codes written by the instructer.)
+(DelFEM2 is a collection of useful C++ codes written by the instructor.)
 
 
 
@@ -31,13 +31,13 @@ $ git submodule update --init 3rd_party/delfem2
 Build the `main.cpp` using `cmake`. Run the program and take a screenshot image of the window.  Paste the screenshot image below by editing this mark down document:
 
 === paste screenshot here ===
-
+![](task7_P1_answer.png)
 
 
 
 ## Problem 2
 
-Optimize the rotation matrix `R` such that the sum of squared distances between the rotated source points and fixed target points are minimized. Use the Netwon's method for the energy minimization. Write some code around line #71 in the `main.cpp` to compute the gradient and hessian of the energy of one pair of source and target points. (The modifications are probably very little, just two lines of short codes). **Once the implementation is successful, the energy should steadly decrease.** 
+Optimize the rotation matrix `R` such that the sum of squared distances between the rotated source points and fixed target points are minimized. Use the Netwon's method for the energy minimization. Write some code around line #71 in the `main.cpp` to compute the gradient and hessian of the energy of one pair of source and target points. (The modifications are probably very little, just two lines of short codes). **Once the implementation is successful, the energy should steadily decrease.** 
 
 The following slides **may be** useful for this assignments:
 
@@ -58,7 +58,7 @@ Report the energy after convergence:
 Paste the resulting screenshot image below:
 
 === paste screenshot image here ===
-
+![](task7_P2_answer.png)
   
 
 
