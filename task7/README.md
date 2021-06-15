@@ -51,7 +51,7 @@ The following slides **may be** useful for this assignments:
 
 Report the energy after convergence: 
 
-- converged energy = ?????
+- converged energy = 100
 
 
 

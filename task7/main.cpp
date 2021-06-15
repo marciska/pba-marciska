@@ -68,9 +68,21 @@ void WdWddW_Rotation(
 {
   const Eigen::Vector3d Rp = R*p;
   W = (Rp-q).squaredNorm();
-  // compute gradient and hessian of the energy below.
-  // dW =
-  // ddW =
+
+  // Define derivative of skew symmetric matrices
+  Eigen::Matrix3d sk[3];
+  sk[0] << 0,  0, 0,   0, 0, -1,    0, 1, 0;
+  sk[1] << 0,  0, 1,   0, 0,  0,   -1, 0, 0;
+  sk[2] << 0, -1, 0,   1, 0,  0,    0, 0, 0;
+
+  /* Compute Gradient */
+  for (unsigned int i = 0; i < 3; ++i)
+    dW(i) = 2*(sk[i]*Rp).transpose()*(Rp-q);
+
+  /* Compute Hessian */
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      ddW(i,j) = 2*(sk[i]*sk[j]*Rp).transpose()*(Rp-q) + 2*((sk[i]*Rp).transpose()*sk[j]*Rp)(0);
 }
 
 /**
@@ -105,6 +117,7 @@ void OptimizeRotation(
   }
   ddW += 5.e+3*Eigen::Matrix3d::Identity(); // damp for animation
   std::cout << "total energy: " << W << std::endl;
+  // std::cout << "total energy: " << W << ",\ndW:\n" << dW << ",\nddW:\n" << ddW << std::endl;
   Eigen::Vector3d dt = (-ddW.inverse())*dW; // rotation vector for update computed by Newton method
   Eigen::Matrix3d dR;
   dR = Eigen::AngleAxis<double>(dt.norm(), dt.normalized());
