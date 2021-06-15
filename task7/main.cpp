@@ -76,13 +76,18 @@ void WdWddW_Rotation(
   sk[2] << 0, -1, 0,   1, 0,  0,    0, 0, 0;
 
   /* Compute Gradient */
-  for (unsigned int i = 0; i < 3; ++i)
-    dW(i) = 2*(sk[i]*Rp).transpose()*(Rp-q);
+  for (unsigned int i = 0; i < 3; ++i) {
+    // dW(i) = 2*(sk[i]*Rp).transpose()*(Rp-q);
+    dW(i) = (sk[i]*Rp).transpose()*(Rp-q) + ((Rp-q).transpose()*sk[i]*Rp)(0);
+  }
 
   /* Compute Hessian */
   for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
-      ddW(i,j) = 2*(sk[i]*sk[j]*Rp).transpose()*(Rp-q) + 2*((sk[i]*Rp).transpose()*sk[j]*Rp)(0);
+    for (unsigned int j = 0; j < 3; ++j) {
+      // ddW(i,j) = 2*(sk[i]*sk[j]*Rp).transpose()*(Rp-q) + 2*((sk[i]*Rp).transpose()*sk[j]*Rp)(0);
+      ddW(i,j) = (sk[i]*sk[j]*Rp).transpose()*(Rp-q) + ((Rp-q).transpose()*sk[i]*sk[j]*Rp)(0)
+                + ((sk[i]*Rp).transpose()*sk[j]*Rp)(0) + ((sk[j]*Rp).transpose()*sk[i]*Rp)(0);
+    }
 }
 
 /**
