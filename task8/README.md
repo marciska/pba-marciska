@@ -15,14 +15,14 @@ In this assignment, it is necessary to install [Eigen](https://eigen.tuxfamily.o
 - [How to set up the Eigen Library](../doc/setup_eigen.md)  
 
 
-Additionally, you need the newest version of the library [DelFEM2](https://github.com/nobuyuki83/delfem2) in `pba-<username>/3rd_party` . Please keep this library installed and updated by. 
+Additionally, you need the newest version of the library [DelFEM2](https://github.com/nobuyuki83/delfem2) in `pba-<username>/3rd_party` . Please keep this library installed and updated by 
 
 ```bash
 $ cd pba-<username> # go to the top of local repository
 $ git submodule update --init 3rd_party/delfem2
 ```
 
-(DelFEM2 is a collection of useful C++ codes written by the instructer.)
+(DelFEM2 is a collection of useful C++ codes written by the instructor.)
 
 
 
@@ -31,7 +31,7 @@ $ git submodule update --init 3rd_party/delfem2
 Build the program using `cmake`. Run the program and take a screenshot image of the window. Paste the screenshot image below by editing this mark down document:
 
 === paste screenshot here ===
-
+![task8_P1_answer](task8_P1_answer.png)
 
 
 
@@ -51,12 +51,7 @@ The following slide may be useful :
 Paste the screenshot image of the animation below:
 
 == paste screenshot image here==
-
-
-
-
-
-
+![task8_P2_answer](task8_P2_answer.png)
 
 
 
