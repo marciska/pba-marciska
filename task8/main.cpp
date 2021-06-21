@@ -104,11 +104,12 @@ void AnimationByEnergyMinimization(
 { // simulation
   const unsigned int nDof = aXY.size(); // total degree of freedom
   const unsigned int np = nDof/2; // number of points
-  // make tentative position aXYt = aXY + dt*aUV
+  /* Step 1: compute tentative position aXYt = aXY + dt*aUV */
   std::vector<double> aXYt = aXY;
   for(unsigned int i=0;i<nDof;++i){
     aXYt[i] += dt*aUV[i];
   }
+  /* Step 2: Minimize Energy to get the update for x_{i+1} */
   Eigen::MatrixXd hessW(nDof,nDof); // hessian matrix
   Eigen::VectorXd gradW(nDof); // gradient vector
   hessW.setZero();
@@ -149,7 +150,8 @@ void AnimationByEnergyMinimization(
   }
   // add the inertia effect below
   for(unsigned int i=0;i<nDof;++i){
-  // hessW(i,i) +=
+    // hessW(i, i) += 2*mass_point/(dt * dt);
+    hessW(i, i) += mass_point/(dt * dt);
   }
   // adding boundary condition
   for(unsigned int i=0;i<nDof;++i){
@@ -162,9 +164,9 @@ void AnimationByEnergyMinimization(
   }
   Eigen::FullPivLU< Eigen::MatrixXd > lu(hessW); // LU decomposition
   Eigen::VectorXd update = lu.solve(gradW); // solve matrix
-  // modify velocity and position update below.
+  /* Step 3: modify velocity and update position */
   for(unsigned int i=0;i<nDof;++i){
-//    aUV[i] =
+    aUV[i] = -update(i)/dt;
     aXY[i] = aXY[i]-update(i);
   }
 
