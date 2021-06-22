@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_BUILD_TYPE Release) # Build in Release-Mode. Else Eigen library is EXTREMELY slow.
 IF(MSVC)
   set(CMAKE_CXX_FLAGS "/W4 -O2 \
     /wd4100 /wd4458 /wd4577 /wd4267 /wd4244 /wd4505 /wd4838 \
@@ -12,6 +13,7 @@ ELSE()
 ENDIF()
 
 project(task8)
+
 
 ################################
 
@@ -29,7 +31,7 @@ SET(EIGEN3_ROOT
   ${EIGEN3_ROOT} ) # specify candidate for eigen location
 include(${CMAKE_CURRENT_SOURCE_DIR}/../3rd_party/FindEigen3.cmake) # call script to find eigen3
 #find_package(Eigen3 REQUIRED) # this works only for installation from package manager
-message(STATUS "eigen3 locatoin: ${EIGEN3_INCLUDE_DIR}")
+message(STATUS "eigen3 location: ${EIGEN3_INCLUDE_DIR}")
 
 # delfem2
 add_definitions(-DDFM2_HEADER_ONLY=ON)
