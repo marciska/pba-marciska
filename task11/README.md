@@ -40,6 +40,7 @@ Build the program using `cmake`.
 Run the program and take a screenshot image of the window. Paste the screenshot image below by editing this mark down document:
 
 === paste screenshot here ===
+![task11_P1_answer](task11_P1_answer.png)
 
 
 ## Problem 2
@@ -62,7 +63,7 @@ Write down the eigenvalues of the inertia tensor below (they will be shown in th
 Paste the screenshot image below:
 
 === paste screenshot here ===
-
+![task11_P2_answer](task11_P2_answer.png)
 
 
 The following slides may be useful:
