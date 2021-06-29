@@ -56,7 +56,13 @@ void InertiaTensor(
         Eigen::Map<Eigen::Vector3d>(aXYZ.data()+aTri[it*3+2]*3)
     };
     const double area = (ap[1]-ap[0]).cross(ap[2]-ap[0]).norm()/2; // area of triangle
-    // write some code below to compute inertia tensor
+    /* Compute inertia tensor: I = -\sum_i {m_i * Skew(X_i)^2} */
+    for (unsigned int i=0; i < 3; ++i) {
+      for (unsigned int j=0; j < 3; ++j) {
+        double factor = (i==j)? 1./6. : 1./12.;
+        Imat -= factor * area * (ap[i]*ap[j].transpose() - ap[i].dot(ap[j])*Eigen::Matrix3d::Identity());
+      }
+    }
   }
 }
 
