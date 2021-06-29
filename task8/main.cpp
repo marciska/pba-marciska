@@ -150,7 +150,8 @@ void AnimationByEnergyMinimization(
   }
   // add the inertia effect below
   for(unsigned int i=0;i<nDof;++i){
-    hessW(i, i) += 2*mass_point/(dt * dt);
+    gradW(i) += mass_point*(aXY[i] - aXYt[i])/(dt * dt);
+    hessW(i, i) += mass_point/(dt * dt);
   }
   // adding boundary condition
   for(unsigned int i=0;i<nDof;++i){
@@ -243,9 +244,10 @@ int main()
   if ( !glfwInit() ) { exit(EXIT_FAILURE); }
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+  
   // ------
+  double t = 0;
   viewer.InitGL();
-
   while (!glfwWindowShouldClose(viewer.window)) {
     AnimationByEnergyMinimization(
         aXY,aUV,
@@ -261,6 +263,9 @@ int main()
     DrawMeshLine2(aXY,aLine);
     viewer.SwapBuffers();
     glfwPollEvents();
+
+    t += dt;
+    std::cout << "Time: t=" << t << "s" << std::endl;
   }
   glfwDestroyWindow(viewer.window);
   glfwTerminate();
