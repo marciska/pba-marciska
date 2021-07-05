@@ -133,19 +133,22 @@ int main()
         const Eigen::Vector2f Tcg = (am[0]*aq[0]+am[1]*aq[1]+am[2]*aq[2]+am[3]*aq[3])/(am[0]+am[1]+am[2]+am[3]);
 
         // Compute svd of BA^T
-        const Eigen::Matrix2f BAT = am[0]*(ap[0]-tcg)*(aq[0]-tcg).transpose()+am[1]*(ap[1]-tcg)*(aq[1]-tcg).transpose()+am[2]*(ap[2]-tcg)*(aq[2]-tcg).transpose()+am[3]*(ap[3]-tcg)*(aq[3]-tcg).transpose();
+        const Eigen::Matrix2f BAT = am[0]*(ap[0]-tcg)*(aq[0]-tcg).transpose()
+                                  +am[1]*(ap[1]-tcg)*(aq[1]-tcg).transpose()
+                                  +am[2]*(ap[2]-tcg)*(aq[2]-tcg).transpose()
+                                  +am[3]*(ap[3]-tcg)*(aq[3]-tcg).transpose();
         const Eigen::JacobiSVD<Eigen::Matrix2f> svd(BAT, Eigen::ComputeFullU | Eigen::ComputeFullV);
 
         // Compute Ropt, topt
-        const Eigen::Matrix2f R = Eigen::Matrix2f::Identity(); // TODO: The 🦆 is R. For now, assume it to be the Identity matrix
-        const Eigen::Vector2f topt = tcg - R * Tcg;
         const Eigen::Matrix2f Ropt = svd.matrixU() * svd.matrixV().transpose();
+        const Eigen::Matrix2f R = Ropt; // R should be the optimal Rotation matrix... right? 🦆
+        const Eigen::Vector2f topt = tcg - R * Tcg;
 
         // Update (tentative) position
         for(unsigned int i = 0; i < 4; ++i) {
-          const Eigen::Vector2f aXYt_ = Ropt * aq[i] + topt;
-          aXYt[iq*4 + 2*i + 0] = aXYt_(0);
-          aXYt[iq*4 + 2*i + 1] = aXYt_(1);
+          const Eigen::Vector2f aXYti = Ropt * aq[i] + topt;
+          aXYt[aQuad[iq*4+i]*2+0] = aXYti(0);
+          aXYt[aQuad[iq*4+i]*2+1] = aXYti(1);
         }
       }
       /* Step3: Set position/shape and velocity */
