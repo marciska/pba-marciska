@@ -100,10 +100,12 @@ int main()
         aUV[ixy*2+0] = 0.0;
         aUV[ixy*2+1] = 0.0;
       }
-      for(unsigned int ixy=0;ixy<aXY.size()/2;++ixy){ // compute tentative shape
+      /* Step1: Compute temporary position/shape */
+      for(unsigned int ixy=0;ixy<aXY.size()/2;++ixy){
         aXYt[ixy*2+0] = aXY[ixy*2+0] + dt*aUV[ixy*2+0];
         aXYt[ixy*2+1] = aXY[ixy*2+1] + dt*aUV[ixy*2+1];
       }
+      /* Step2: For each element, update position/shape */
       for(unsigned int iq=0;iq<aQuad.size()/4;++iq){
         const Eigen::Vector2f ap[4] = { // coordinates of quad's corner points (tentative shape)
             Eigen::Map<Eigen::Vector2f>(aXYt.data()+aQuad[iq*4+0]*2),
@@ -120,13 +122,34 @@ int main()
             aMass[aQuad[iq*4+1]],
             aMass[aQuad[iq*4+2]],
             aMass[aQuad[iq*4+3]] };
-        // write some code below to rigidly transform the points in the rest shape (`aq`) such that the
-        // weighted sum of squared distances against the points in the tentative shape (`qp`) is minimized (`am` is the weight).
 
+        /*
+          Rigidly transform the points in the rest shape (`aq`) such that the weighted sum of squared distances against
+          the points in the tentative shape (`qp`) is minimized (`am` is the weight).
+        */
 
-        // no edits further down
+        // Compute tcg & Tcg
+        const Eigen::Vector2f tcg = (am[0]*ap[0]+am[1]*ap[1]+am[2]*ap[2]+am[3]*ap[3])/(am[0]+am[1]+am[2]+am[3]);
+        const Eigen::Vector2f Tcg = (am[0]*aq[0]+am[1]*aq[1]+am[2]*aq[2]+am[3]*aq[3])/(am[0]+am[1]+am[2]+am[3]);
+
+        // Compute svd of BA^T
+        const Eigen::Matrix2f BAT = am[0]*(ap[0]-tcg)*(aq[0]-tcg).transpose()+am[1]*(ap[1]-tcg)*(aq[1]-tcg).transpose()+am[2]*(ap[2]-tcg)*(aq[2]-tcg).transpose()+am[3]*(ap[3]-tcg)*(aq[3]-tcg).transpose();
+        const Eigen::JacobiSVD<Eigen::Matrix2f> svd(BAT, Eigen::ComputeFullU | Eigen::ComputeFullV);
+
+        // Compute Ropt, topt
+        const Eigen::Matrix2f R = Eigen::Matrix2f::Identity(); // TODO: The 🦆 is R. For now, assume it to be the Identity matrix
+        const Eigen::Vector2f topt = tcg - R * Tcg;
+        const Eigen::Matrix2f Ropt = svd.matrixU() * svd.matrixV().transpose();
+
+        // Update (tentative) position
+        for(unsigned int i = 0; i < 4; ++i) {
+          const Eigen::Vector2f aXYt_ = Ropt * aq[i] + topt;
+          aXYt[iq*4 + 2*i + 0] = aXYt_(0);
+          aXYt[iq*4 + 2*i + 1] = aXYt_(1);
+        }
       }
-      for(unsigned int ixy=0;ixy<aXY.size()/2;++ixy) { // update position and velocities
+      /* Step3: Set position/shape and velocity */
+      for(unsigned int ixy=0;ixy<aXY.size()/2;++ixy) {
         aUV[ixy*2+0] = (aXYt[ixy*2+0] - aXY[ixy*2+0])/dt;
         aUV[ixy*2+1] = (aXYt[ixy*2+1] - aXY[ixy*2+1])/dt;
         aXY[ixy*2+0] = aXYt[ixy*2+0];
