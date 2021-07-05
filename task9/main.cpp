@@ -133,10 +133,10 @@ int main()
         const Eigen::Vector2f Tcg = (am[0]*aq[0]+am[1]*aq[1]+am[2]*aq[2]+am[3]*aq[3])/(am[0]+am[1]+am[2]+am[3]);
 
         // Compute svd of BA^T
-        const Eigen::Matrix2f BAT = am[0]*(ap[0]-tcg)*(aq[0]-tcg).transpose()
-                                  +am[1]*(ap[1]-tcg)*(aq[1]-tcg).transpose()
-                                  +am[2]*(ap[2]-tcg)*(aq[2]-tcg).transpose()
-                                  +am[3]*(ap[3]-tcg)*(aq[3]-tcg).transpose();
+        const Eigen::Matrix2f BAT = am[0]*(ap[0]-tcg)*(aq[0]-Tcg).transpose()
+                                  +am[1]*(ap[1]-tcg)*(aq[1]-Tcg).transpose()
+                                  +am[2]*(ap[2]-tcg)*(aq[2]-Tcg).transpose()
+                                  +am[3]*(ap[3]-tcg)*(aq[3]-Tcg).transpose();
         const Eigen::JacobiSVD<Eigen::Matrix2f> svd(BAT, Eigen::ComputeFullU | Eigen::ComputeFullV);
 
         // Compute Ropt, topt
