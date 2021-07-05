@@ -32,7 +32,7 @@ Compile the `main.cpp` using the `CMakeLists.txt`, run the program and take a sc
 Paste the image below.
 
 === paste screenshot here ===
-
+![task9_P1_answer](task9_P1_answer.png)
 
 
 ## Problem 2
@@ -44,7 +44,7 @@ The edits should be necessary only around line #123.
 Paste the screenshot image of the program once it is finished.
 
 === paste screenshot here ===
-
+![task9_P2_answer](task9_P2_answer.png)
 
 ## Material 
 
