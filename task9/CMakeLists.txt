@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+#set(CMAKE_BUILD_TYPE Release)
 IF(MSVC)
   set(CMAKE_CXX_FLAGS "/W4 -O2 \
     /wd4100 /wd4458 /wd4577 /wd4267 /wd4244 /wd4505 /wd4838 \
